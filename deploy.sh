@@ -1,27 +1,35 @@
 # deploy github runner based on docker
-# tested on Debian 8.3 x64
+# tested on Debian 9 x64
 # tested on digitalocean and with Vagrant
-# v0.1
+# v0.2
 
 
 # CONFIGURATION - edit before deploy
 # if your gitlab web interface uses self-signed certificate, provide its url 
 _ci_selfsigned_crt=''
-# 'hostname' of your github server (eextracted from URL) 
+# 'hostname' of your github server (extracted from URL) 
 _ci_selfsigned_hostname=''
 
 
 
 
-# URL of Gitlab CI, like 'https://gitlab.com/ci'
+# URL of Gitlab CI, like 'https://gitlab.com/'
 _ci_server=''
+
 # Runner token
 _ci_token=''
+
 # Runner description
 _ci_desc='ci-vagrant'
+
 # Runner tag(s)
 _ci_tags='ci-vagrant'
 
+# Run untagged builds
+_ci_untagged='true'
+
+# Lock Runner to current project
+_ci_lock='false'
 
 _ci_executor='docker'
 _ci_executor_image='ruby:2.1'
@@ -29,12 +37,7 @@ _ci_executor_image='ruby:2.1'
 
 
 
-
-
-
-
 # DO NOT EDIT
-
 echoInfo() {
     echo;echo;
     echo $1;
@@ -44,16 +47,20 @@ echoInfo() {
 
 
 sudo apt-get install -y vim aptitude htop curl > /dev/null
+
 echoInfo "Updating system"
-sudo apt-get update > /dev/null
-sudo apt-get -y upgrade > /dev/null
+sudo aptitude update > /dev/null
+sudo aptitude -y upgrade > /dev/null
+
 echoInfo "Installing docker"
 curl -sSL https://get.docker.com/ | sudo sh > /dev/null && echo "Docker installed"
+sudo usermod -aG docker vagrant
 curl -s -L https://packages.gitlab.com/install/repositories/runner/gitlab-ci-multi-runner/script.deb.sh > s.sh
 echoInfo "Preparing environment for Gitlab runner"
 sudo bash s.sh > /dev/null
+
 echoInfo "Installing multi-runner"
-sudo apt-get -y install gitlab-ci-multi-runner > /dev/null
+sudo aptitude -y install gitlab-ci-multi-runner > /dev/null
 
 
 if [[ -n "$_ci_selfsigned_crt" ]] ; then
@@ -63,5 +70,5 @@ fi
 
 
 
-printf $_ci_server$'\n'$_ci_token$'\n'$_ci_desc$'\n'$_ci_tags$'\n'$_ci_executor$'\n'$_ci_executor_image$'\n' | sudo gitlab-ci-multi-runner register && \
+printf $_ci_server$'\n'$_ci_token$'\n'$_ci_desc$'\n'$_ci_tags$'\n'$_ci_untagged$'\n'$_ci_lock$'\n'$_ci_executor$'\n'$_ci_executor_image$'\n' | sudo gitlab-ci-multi-runner register && \
     echoInfo "Gitlab runner installed successfully."
