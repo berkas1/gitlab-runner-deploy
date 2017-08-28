@@ -26,10 +26,10 @@ _ci_desc='ci-vagrant'
 _ci_tags='ci-vagrant'
 
 # Run untagged builds
-_ci_untagged='true'
+#_ci_untagged='true'
 
 # Lock Runner to current project
-_ci_lock='false'
+#_ci_lock='false'
 
 _ci_executor='docker'
 _ci_executor_image='ruby:2.1'
@@ -70,5 +70,6 @@ fi
 
 
 
-printf $_ci_server$'\n'$_ci_token$'\n'$_ci_desc$'\n'$_ci_tags$'\n'$_ci_untagged$'\n'$_ci_lock$'\n'$_ci_executor$'\n'$_ci_executor_image$'\n' | sudo gitlab-ci-multi-runner register && \
-    echoInfo "Gitlab runner installed successfully."
+sudo gitlab-ci-multi-runner register -n --url="$_ci_server" --registration-token="$_ci_token" \
+  --description="$_ci_desc" --tag-list="[$_ci_tags]" --executor="$_ci_executor" \
+  --docker-image="$_ci_executor_image" --run-untagged
